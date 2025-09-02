@@ -28,7 +28,7 @@ jobs:
           docker tag agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-browser:latest agentscope/runtime-sandbox-browser:latest
 
           docker pull agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-appworld:latest-arm64
-          docker tag agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-appworld:latest-arm64 agentscope/runtime-sandbox-appworld:latest-arm64
+          docker tag agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-appworld:latest-arm64 agentscope/runtime-sandbox-appworld-arm64
 
           docker pull agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-appworld:latest
           docker tag agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-appworld:latest agentscope/runtime-sandbox-appworld:latest
@@ -40,7 +40,7 @@ jobs:
           docker save agentscope/runtime-sandbox-filesystem:latest -o ${{ github.workspace }}/docker-cache/runtime-sandbox-filesystem.tar
           docker save agentscope/runtime-sandbox-browser:latest -o ${{ github.workspace }}/docker-cache/runtime-sandbox-browser.tar
           docker save agentscope/runtime-sandbox-appworld:latest -o ${{ github.workspace }}/docker-cache/runtime-sandbox-appworld.tar
-          docker save agentscope/runtime-sandbox-appworld:latest-arm64 -o ${{ github.workspace }}/docker-cache/runtime-sandbox-appworld-arm64.tar
+          docker save agentscope/runtime-sandbox-appworld-arm64 -o ${{ github.workspace }}/docker-cache/runtime-sandbox-appworld-arm64.tar
 
       - name: Cache Docker images
         uses: actions/cache@v4
