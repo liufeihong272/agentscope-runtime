@@ -15,27 +15,9 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Cache Docker layers
-        id: cache-docker
-        uses: actions/cache@v4
-        with:
-          path: ${{ runner.temp }}/docker-cache
-          key: ${{ runner.os }}-docker-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-docker-
-
-      - name: Check cache restore
-        run: |
-          if [ "${{ steps.cache-docker.outputs.cache-hit }}" = 'true' ]; then
-            echo "Cache was restored."
-          else
-            echo "Cache was not restored."
-          fi
-
       - name: Pull and tag images
         run: |
           echo "Pulling and tagging images..."
-
           docker pull agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-base:latest
           docker tag agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-base:latest agentscope/runtime-sandbox-base:latest
 
@@ -51,13 +33,19 @@ jobs:
           docker pull agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-appworld:latest
           docker tag agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-appworld:latest agentscope/runtime-sandbox-appworld:latest
 
-      - name: Verify images
+      - name: Save Docker images
         run: |
-          echo "Verifying images..."
-          docker images | grep "agentscope/runtime-sandbox-base"
-          docker images | grep "agentscope/runtime-sandbox-filesystem"
-          docker images | grep "agentscope/runtime-sandbox-browser"
-          docker images | grep "agentscope/runtime-sandbox-appworld"
+          mkdir -p ${{ github.workspace }}/docker-cache
+          docker save agentscope/runtime-sandbox-base:latest -o ${{ github.workspace }}/docker-cache/runtime-sandbox-base.tar
+          docker save agentscope/runtime-sandbox-filesystem:latest -o ${{ github.workspace }}/docker-cache/runtime-sandbox-filesystem.tar
+          docker save agentscope/runtime-sandbox-browser:latest -o ${{ github.workspace }}/docker-cache/runtime-sandbox-browser.tar
+          docker save agentscope/runtime-sandbox-appworld:latest -o ${{ github.workspace }}/docker-cache/runtime-sandbox-appworld.tar
+          docker save agentscope/runtime-sandbox-appworld:latest-arm64 -o ${{ github.workspace }}/docker-cache/runtime-sandbox-appworld-arm64.tar
 
-      - name: Check final cache save
-        run: echo "Final cache save complete."
+      - name: Cache Docker images
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/docker-cache
+          key: ${{ runner.os }}-docker-images-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-docker-images-
