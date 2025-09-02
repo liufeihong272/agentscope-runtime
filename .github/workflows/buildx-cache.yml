@@ -41,11 +41,13 @@ jobs:
           docker save agentscope/runtime-sandbox-browser:latest -o ${{ github.workspace }}/docker-cache/runtime-sandbox-browser.tar
           docker save agentscope/runtime-sandbox-appworld:latest -o ${{ github.workspace }}/docker-cache/runtime-sandbox-appworld.tar
           docker save agentscope/runtime-sandbox-appworld-arm64 -o ${{ github.workspace }}/docker-cache/runtime-sandbox-appworld-arm64.tar
+          echo "Saved Docker images:"
+          ls -l ${{ github.workspace }}/docker-cache
 
       - name: Cache Docker images
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/docker-cache
-          key: ${{ runner.os }}-docker-images-${{ github.sha }}
+          key: ${{ runner.os }}-docker-images-${{ hashFiles('Dockerfile') }}
           restore-keys: |
             ${{ runner.os }}-docker-images-

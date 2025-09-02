@@ -3,7 +3,7 @@ name: Unit Tests
 on:
   push:
     branches:
-      - 'main'
+      - main
 
 jobs:
   test:
@@ -16,15 +16,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/docker-cache
-          key: ${{ runner.os }}-docker-images-${{ github.sha }}
+          key: ${{ runner.os }}-docker-images-${{ hashFiles('Dockerfile') }}
           restore-keys: |
             ${{ runner.os }}-docker-images-
 
-      - name: Check cache hit
+      - name: Debug Restored Cache
         run: |
-          if [ "${{ steps.restore-cache.outputs.cache-hit }}" != 'true' ]; then
-            echo "Cache was not hit!"
-          fi
+          echo "Restored cache files:"
+          ls -l ${{ github.workspace }}/docker-cache
 
       - name: Load Docker images
         run: |
