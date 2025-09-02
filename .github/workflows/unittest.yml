@@ -47,6 +47,23 @@ jobs:
           export PIP_DEFAULT_TIMEOUT=300
           pip install -q -e ".[dev,sandbox,agentscope,langgraph,agno,a2a,autogen]"
 
+      - name: Load Docker images (if needed)
+        run: |
+          echo "Loading cached Docker images..."
+          docker load -i ${{ runner.temp }}/docker-images/runtime-sandbox-base.tar || echo "Base image not found in cache"
+          docker load -i ${{ runner.temp }}/docker-images/runtime-sandbox-filesystem.tar || echo "Filesystem image not found in cache"
+          docker load -i ${{ runner.temp }}/docker-images/runtime-sandbox-browser.tar || echo "Browser image not found in cache"
+          docker load -i ${{ runner.temp }}/docker-images/runtime-sandbox-appworld.tar || echo "Appworld image not found in cache"
+          docker load -i ${{ runner.temp }}/docker-images/runtime-sandbox-appworld-arm64.tar || echo "Appworld ARM64 image not found in cache"
+
+      - name: Verify Docker images
+        run: |
+          echo "Verifying Docker images..."
+          docker images | grep "agentscope/runtime-sandbox-base"
+          docker images | grep "agentscope/runtime-sandbox-filesystem"
+          docker images | grep "agentscope/runtime-sandbox-browser"
+          docker images | grep "agentscope/runtime-sandbox-appworld"
+
       - name: Run tests with coverage
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
