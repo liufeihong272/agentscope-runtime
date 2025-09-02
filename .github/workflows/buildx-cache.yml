@@ -23,19 +23,40 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-docker-
 
+      - name: Check cache restore
+        run: |
+          if [ "${{ steps.cache-docker.outputs.cache-hit }}" = 'true' ]; then
+            echo "Cache was restored."
+          else
+            echo "Cache was not restored."
+          fi
+
       - name: Pull and tag images
         run: |
+          echo "Pulling and tagging images..."
+          
           docker pull agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-base:latest
           docker tag agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-base:latest agentscope/runtime-sandbox-base:latest
-
+          
           docker pull agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-filesystem:latest
           docker tag agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-filesystem:latest agentscope/runtime-sandbox-filesystem:latest
-
+          
           docker pull agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-browser:latest
           docker tag agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-browser:latest agentscope/runtime-sandbox-browser:latest
-
+          
           docker pull agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-appworld:latest-arm64
           docker tag agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-appworld:latest-arm64 agentscope/runtime-sandbox-appworld:latest-arm64
-
+          
           docker pull agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-appworld:latest
           docker tag agentscope-registry.ap-southeast-1.cr.aliyuncs.com/agentscope/runtime-sandbox-appworld:latest agentscope/runtime-sandbox-appworld:latest
+
+      - name: Verify images
+        run: |
+          echo "Verifying images..."
+          docker images | grep "agentscope/runtime-sandbox-base"
+          docker images | grep "agentscope/runtime-sandbox-filesystem"
+          docker images | grep "agentscope/runtime-sandbox-browser"
+          docker images | grep "agentscope/runtime-sandbox-appworld"
+
+      - name: Check final cache save
+        run: echo "Final cache save complete."
