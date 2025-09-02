@@ -12,6 +12,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Restore Docker cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/docker-cache
+          key: ${{ runner.os }}-docker-images-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-docker-images-
+
+      - name: Check cache hit
+        run: |
+          if [ "${{ steps.restore-cache.outputs.cache-hit }}" != 'true' ]; then
+            echo "Cache was not hit!"
+          fi
+
+      - name: Load Docker images
+        run: |
+          docker load -i ${{ github.workspace }}/docker-cache/runtime-sandbox-base.tar || echo "Base image not found in cache"
+          docker load -i ${{ github.workspace }}/docker-cache/runtime-sandbox-filesystem.tar || echo "Filesystem image not found in cache"
+          docker load -i ${{ github.workspace }}/docker-cache/runtime-sandbox-browser.tar || echo "Browser image not found in cache"
+          docker load -i ${{ github.workspace }}/docker-cache/runtime-sandbox-appworld.tar || echo "Appworld image not found in cache"
+          docker load -i ${{ github.workspace }}/docker-cache/runtime-sandbox-appworld-arm64.tar || echo "Appworld ARM64 image not found in cache"
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -38,14 +60,6 @@ jobs:
         run: |
           export PIP_DEFAULT_TIMEOUT=300
           pip install -q -e ".[dev,sandbox,agentscope,langgraph,agno,a2a,autogen]"
-
-      - name: Load Docker images
-        run: |
-          docker load -i ${{ github.workspace }}/docker-cache/runtime-sandbox-base.tar || echo "Base image not found in cache"
-          docker load -i ${{ github.workspace }}/docker-cache/runtime-sandbox-filesystem.tar || echo "Filesystem image not found in cache"
-          docker load -i ${{ github.workspace }}/docker-cache/runtime-sandbox-browser.tar || echo "Browser image not found in cache"
-          docker load -i ${{ github.workspace }}/docker-cache/runtime-sandbox-appworld.tar || echo "Appworld image not found in cache"
-          docker load -i ${{ github.workspace }}/docker-cache/runtime-sandbox-appworld-arm64.tar || echo "Appworld ARM64 image not found in cache"
 
       - name: Verify Docker images
         run: |
